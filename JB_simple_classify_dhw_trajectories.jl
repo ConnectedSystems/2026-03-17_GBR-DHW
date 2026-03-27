@@ -64,7 +64,7 @@ using GeoDataFrames
 
 const DATA_DIR = "./jb_dhw_mcb"
 const OUTPUT_DIR = "./MCB_traj_classes"
-const ADRIA_DOMAIN_PATH = "C:/Users/tiwanaga/development/ADRIA_data/GBR_HighResCoralStress_2026-03-17_v080"
+const ADRIA_DOMAIN_PATH = "./data/GBR_HighResCoralStress_2026-03-17_v080"
 const REGION_GPKG = "./data/PDP_reefs.gpkg"
 
 const ADRIA_ID_COLUMN = :UNIQUE_ID

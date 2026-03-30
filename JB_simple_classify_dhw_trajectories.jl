@@ -262,13 +262,20 @@ end
 function assign_regions(
     loc_data::DataFrame,
     gpkg_path::String,
-    id_col::Symbol,
     region_col::Symbol
 )::Vector{Union{String,Missing}}
     region_gdf = GeoDataFrames.read(gpkg_path)
-    region_lookup = region_gdf[:, [id_col, region_col]]
-    joined = leftjoin(loc_data, region_lookup; on=id_col, makeunique=true)
-    return [ismissing(v) ? missing : string(v) for v in joined[:, region_col]]
+    region_lookup = region_gdf[:, [ADRIA_ID_COLUMN, region_col]]
+
+    loc_data.PDP_region .= ""
+    for reg in unique(region_lookup.PDP_region)
+        target_ids = region_lookup[region_lookup.PDP_region .== reg, :UNIQUE_ID]
+        loc_data[loc_data.UNIQUE_ID .∈ Ref(target_ids), region_col] .= reg
+    end
+
+    loc_data.PDP_region = replace(loc_data.PDP_region, "" => missing)
+
+    return loc_data.PDP_region
 end
 
 # ── Plotting helpers ───────────────────────────────────────────────────────────
@@ -338,7 +345,7 @@ n_adria_locs = length(adria_ids)
 adria_idx_map = Dict(id => i for (i, id) in enumerate(adria_ids))
 
 @info "Assigning reef locations to regions via $REGION_GPKG"
-reef_regions = assign_regions(dom.loc_data, REGION_GPKG, ADRIA_ID_COLUMN, PDP_REGION_COLUMN)
+reef_regions = assign_regions(dom.loc_data, REGION_GPKG, PDP_REGION_COLUMN)
 unique_regions = sort(collect(Set(skipmissing(reef_regions))))
 n_outside = sum(ismissing.(reef_regions))
 
